@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VoiceShop AI 🎤</title>
+<link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+<!-- NAVBAR -->
+<nav class="navbar">
+  <div class="nav-brand">🛒 VoiceShop <span>AI</span></div>
+  <div class="nav-center">
+    <input type="text" id="searchInput" placeholder="Search products..." oninput="searchProducts(this.value)">
+  </div>
+  <div class="nav-right">
+    <div id="authButtons">
+      <button onclick="showModal('loginModal')" class="btn-outline">Login</button>
+      <button onclick="showModal('registerModal')" class="btn-primary">Register</button>
+    </div>
+    <div id="userMenu" style="display:none">
+      <span id="userName"></span>
+      <button onclick="showCart()" class="btn-cart">🛒 <span id="cartCount">0</span></button>
+      <button onclick="logout()" class="btn-outline">Logout</button>
+    </div>
+  </div>
+</nav>
+
+<!-- VOICE ASSISTANT BAR -->
+<div class="voice-bar" id="voiceBar">
+  <div class="voice-status" id="voiceStatus">🎤 Click mic to talk to VoiceShop AI</div>
+  <button class="mic-btn" id="micBtn" onclick="toggleVoice()">
+    <span class="mic-icon">🎤</span>
+  </button>
+  <div class="voice-transcript" id="voiceTranscript"></div>
+</div>
+
+<!-- AI RESPONSE BUBBLE -->
+<div class="ai-bubble" id="aiBubble" style="display:none">
+  <span class="ai-avatar">🤖</span>
+  <p id="aiMessage"></p>
+</div>
+
+<!-- MAIN CONTENT -->
+<main class="main-content">
+  <!-- Categories -->
+  <div class="categories" id="categories"></div>
+
+  <!-- Products Grid -->
+  <div class="section-title" id="sectionTitle">All Products</div>
+  <div class="products-grid" id="productsGrid"></div>
+</main>
+
+<!-- CART SIDEBAR -->
+<div class="cart-overlay" id="cartOverlay" onclick="closeCart()"></div>
+<div class="cart-sidebar" id="cartSidebar">
+  <div class="cart-header">
+    <h2>🛒 Your Cart</h2>
+    <button onclick="closeCart()">✕</button>
+  </div>
+  <div class="cart-items" id="cartItems"></div>
+  <div class="cart-footer">
+    <div class="cart-total">Total: <strong id="cartTotal">₹0</strong></div>
+    <button class="btn-checkout" onclick="showCheckout()">Proceed to Checkout</button>
+  </div>
+</div>
+
+<!-- CHECKOUT MODAL -->
+<div class="modal" id="checkoutModal">
+  <div class="modal-box">
+    <h2>🚀 Checkout</h2>
+    <input type="text" id="checkoutAddress" placeholder="Delivery Address" class="input-field">
+    <select id="paymentMethod" class="input-field">
+      <option value="COD">Cash on Delivery</option>
+      <option value="UPI">UPI</option>
+      <option value="Card">Credit/Debit Card</option>
+    </select>
+    <button class="btn-primary full-width" onclick="placeOrder()">Place Order 🎉</button>
+    <button class="btn-outline full-width mt" onclick="closeModal('checkoutModal')">Cancel</button>
+  </div>
+</div>
+
+<!-- LOGIN MODAL -->
+<div class="modal" id="loginModal">
+  <div class="modal-box">
+    <h2>Login</h2>
+    <input type="email" id="loginEmail" placeholder="Email" class="input-field">
+    <input type="password" id="loginPassword" placeholder="Password" class="input-field">
+    <button class="btn-primary full-width" onclick="login()">Login</button>
+    <button class="btn-outline full-width mt" onclick="closeModal('loginModal')">Cancel</button>
+  </div>
+</div>
+
+<!-- REGISTER MODAL -->
+<div class="modal" id="registerModal">
+  <div class="modal-box">
+    <h2>Register</h2>
+    <input type="text" id="regName" placeholder="Full Name" class="input-field">
+    <input type="email" id="regEmail" placeholder="Email" class="input-field">
+    <input type="password" id="regPassword" placeholder="Password" class="input-field">
+    <button class="btn-primary full-width" onclick="register()">Create Account</button>
+    <button class="btn-outline full-width mt" onclick="closeModal('registerModal')">Cancel</button>
+  </div>
+</div>
+
+<!-- ORDER SUCCESS -->
+<div class="modal" id="successModal">
+  <div class="modal-box text-center">
+    <div style="font-size:60px">🎉</div>
+    <h2>Order Placed!</h2>
+    <p id="successMsg"></p>
+    <button class="btn-primary full-width" onclick="closeModal('successModal')">Continue Shopping</button>
+  </div>
+</div>
+
+<script src="/static/js/voice_app.js"></script>
+</body>
+</html>
