@@ -8,6 +8,7 @@ from routes.cart import cart_bp
 from routes.orders import orders_bp
 from routes.voice import voice_bp
 
+
 def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)

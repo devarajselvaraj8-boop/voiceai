@@ -113,6 +113,26 @@
   </div>
 </div>
 
+<div id="userMenu" style="display:none;align-items:center;gap:10px;">
+  <span id="userName"></span>
+  <button onclick="showOrders()" class="btn-orders"> My Orders</button>
+  <button onclick="showCart()" class="btn-cart">🛒 <span id="cartCount">0</span></button>
+  <button onclick="logout()" class="btn-outline">Logout</button>
+</div>
+
+
+<div class="modal" id="ordersModal">
+  <div class="modal-box" style="width:600px;max-width:95vw;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+      <h2> My Order History</h2>
+      <button onclick="closeModal('ordersModal')"
+              style="background:none;border:none;font-size:22px;cursor:pointer;">✕</button>
+    </div>
+    <div id="ordersList"></div>
+  </div>
+</div>
+
+
 <script src="/static/js/voice_app.js"></script>
 </body>
 </html>

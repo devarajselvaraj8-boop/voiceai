@@ -5,7 +5,7 @@ PRODUCTS = [
     {"name":"iPhone 15 Pro","category":"Electronics","price":134900,
      "image":"https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-15-pro-finish-select-202309-6-1inch_AV1?wid=300&hei=300",
      "tags":["iphone","phone","apple","smartphone"]},
-    {"name":"Samsung Galaxy S24","category":"Electronics","price":79999,
+    {"name":"condem xl","category":"Electronics","price":79999,
      "image":"https://images.samsung.com/is/image/samsung/p6pim/in/2401/gallery/in-galaxy-s24-s928-sm-s928bzkgins-thumb-539573119?$344_344_PNG$",
      "tags":["samsung","phone","android","smartphone"]},
     {"name":"Nike Air Max 270","category":"Shoes","price":9995,

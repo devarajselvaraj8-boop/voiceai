@@ -247,5 +247,62 @@ function showAIMessage(msg) {
   setTimeout(() => document.getElementById('aiBubble').style.display = 'none', 5000);
 }
 
+
+// ─── ORDER HISTORY ────────────────────────────────────
+async function showOrders() {
+  if (!token) { showModal('loginModal'); return; }
+
+  const res = await fetch('/api/orders/', {
+    headers: { 'Authorization': `Bearer ${token}` }
+  });
+  const orders = await res.json();
+  const div = document.getElementById('ordersList');
+
+  if (!orders.length) {
+    div.innerHTML = `
+      <div class="no-orders">
+        <div style="font-size:50px"></div>
+        <p>No orders yet!</p>
+        <p style="font-size:13px;margin-top:8px">Start shopping to see your orders here</p>
+      </div>`;
+    showModal('ordersModal');
+    return;
+  }
+
+  div.innerHTML = orders.reverse().map((o, index) => `
+    <div class="order-card">
+      <div class="order-card-header">
+        <div>
+          <div style="font-weight:700;font-size:15px">Order #${index + 1}</div>
+          <div class="order-id">ID: ${o._id}</div>
+          <div class="order-id"> ${new Date(o.created_at).toLocaleString()}</div>
+        </div>
+        <span class="order-status">✅ ${o.status}</span>
+      </div>
+
+      <div style="margin:10px 0;">
+        ${o.items.map(item => `
+          <div class="order-item-row">
+            <span> ${item.name} × ${item.quantity}</span>
+            <span>₹${item.subtotal.toLocaleString('en-IN')}</span>
+          </div>
+        `).join('')}
+      </div>
+
+      <div class="order-footer">
+        <span> Total</span>
+        <span style="color:#e94560;">₹${o.total.toLocaleString('en-IN')}</span>
+      </div>
+
+      <div class="order-address">
+         ${o.address} &nbsp;|&nbsp;  ${o.payment_method}
+      </div>
+    </div>
+  `).join('');
+
+  showModal('ordersModal');
+}
+
+
 function showModal(id) { document.getElementById(id).classList.add('open'); }
 function closeModal(id) { document.getElementById(id).classList.remove('open'); }
