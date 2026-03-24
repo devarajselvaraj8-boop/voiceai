@@ -518,3 +518,20 @@ body {
   color: #999;
   font-size: 16px;
 }
+
+
+.btn-amazon {
+  background: #ff9900; color: white; border: none;
+  padding: 6px 10px; border-radius: 6px; cursor: pointer;
+  font-size: 12px; font-weight: 600; text-decoration: none;
+  display: flex; align-items: center; gap: 4px;
+}
+.btn-amazon:hover { background: #e68a00; }
+
+.btn-flipkart {
+  background: #2874f0; color: white; border: none;
+  padding: 6px 10px; border-radius: 6px; cursor: pointer;
+  font-size: 12px; font-weight: 600; text-decoration: none;
+  display: flex; align-items: center; gap: 4px;
+}
+.btn-flipkart:hover { background: #1a5dc8; }

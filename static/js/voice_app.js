@@ -97,7 +97,7 @@ async function loadProducts(query = '', category = '') {
   renderProducts(products);
 }
 
-function renderProducts(products) {
+/*function renderProducts(products) {
   const grid = document.getElementById('productsGrid');
   if (!products.length) { grid.innerHTML = '<p style="color:#999;grid-column:1/-1">No products found.</p>'; return; }
   grid.innerHTML = products.map(p => `
@@ -108,6 +108,36 @@ function renderProducts(products) {
         <div class="product-category">${p.category}</div>
         <div class="product-price">₹${p.price.toLocaleString()}</div>
         <button class="btn-add-cart" onclick="addToCart('${p._id}', '${p.name}')">Add to Cart 🛒</button>
+      </div>
+    </div>`).join('');
+}
+*/
+function renderProducts(list) {
+  const grid = document.getElementById('productsGrid');
+  if (!list.length) {
+    grid.innerHTML = '<p style="color:#999;grid-column:1/-1;text-align:center;padding:40px">No products found 😕</p>';
+    return;
+  }
+  grid.innerHTML = list.map(p => `
+    <div class="product-card">
+      <div class="product-img">${p.emoji || '📦'}</div>
+      <div class="product-info">
+        <div class="product-name">${p.name}</div>
+        <div class="product-category">${p.category}</div>
+        <div class="product-price">₹${p.price.toLocaleString('en-IN')}</div>
+        <div style="display:flex;gap:8px;margin-top:8px;">
+          <button class="btn-add-cart" onclick="addToCart('${p._id}','${p.name}')">
+            Add to Cart 🛒
+          </button>
+          <a href="https://www.amazon.in/s?k=${encodeURIComponent(p.name)}&tag=YOUR_AFFILIATE_TAG"
+             target="_blank" class="btn-amazon">
+            Buy on Amazon
+          </a>
+          <a href="https://www.flipkart.com/search?q=${encodeURIComponent(p.name)}"
+             target="_blank" class="btn-flipkart">
+            Buy on Flipkart
+          </a>
+        </div>
       </div>
     </div>`).join('');
 }
