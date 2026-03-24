@@ -520,7 +520,7 @@ body {
 }
 
 
-.btn-amazon {
+/*.btn-amazon {
   background: #ff9900; color: white; border: none;
   padding: 6px 10px; border-radius: 6px; cursor: pointer;
   font-size: 12px; font-weight: 600; text-decoration: none;
@@ -535,3 +535,4 @@ body {
   display: flex; align-items: center; gap: 4px;
 }
 .btn-flipkart:hover { background: #1a5dc8; }
+*/

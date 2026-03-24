@@ -97,7 +97,7 @@ async function loadProducts(query = '', category = '') {
   renderProducts(products);
 }
 
-/*function renderProducts(products) {
+function renderProducts(products) {
   const grid = document.getElementById('productsGrid');
   if (!products.length) { grid.innerHTML = '<p style="color:#999;grid-column:1/-1">No products found.</p>'; return; }
   grid.innerHTML = products.map(p => `
@@ -111,7 +111,7 @@ async function loadProducts(query = '', category = '') {
       </div>
     </div>`).join('');
 }
-*/
+/*
 function renderProducts(list) {
   const grid = document.getElementById('productsGrid');
   if (!list.length) {
@@ -141,6 +141,7 @@ function renderProducts(list) {
       </div>
     </div>`).join('');
 }
+    */
 
 async function loadCategories() {
   const res = await fetch(`${API}/api/products/categories`);
