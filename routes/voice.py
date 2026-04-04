@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify
+"""from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from extensions import mongo
 from bson import ObjectId
@@ -144,6 +144,211 @@ def command():
         r'\b(show|find|search|look|display|for|me|all|some|please|products|items|give|list)\b',
         '', t
     ).strip()
+    print(f"[VOICE] Search keyword: '{clean}'")
+
+    if clean:
+        products = list(mongo.db.products.find({
+            '$or': [
+                {'name':     {'$regex': clean, '$options': 'i'}},
+                {'category': {'$regex': clean, '$options': 'i'}},
+                {'tags':     {'$in':    [clean]}}
+            ]
+        }).limit(8))
+    else:
+        products = list(mongo.db.products.find().limit(8))
+
+    for p in products:
+        p['_id'] = str(p['_id'])
+
+    msg = (
+        f"🔍 Found {len(products)} results for '{clean}'!"
+        if products else
+        f"❌ No products found for '{clean}'"
+    )
+    return jsonify({
+        'intent':   'search_products',
+        'products': products,
+        'message':  msg
+    })
+
+    """
+
+from flask import Blueprint, request, jsonify
+from flask_jwt_extended import jwt_required, get_jwt_identity
+from extensions import mongo
+from bson import ObjectId
+import re
+
+voice_bp = Blueprint('voice', __name__)
+
+def extract_quantity(text):
+    numbers = {'one':1,'two':2,'three':3,'four':4,'five':5}
+    for word, num in numbers.items():
+        if word in text.lower():
+            return num
+    match = re.search(r'\b(\d+)\b', text)
+    return int(match.group(1)) if match else 1
+
+def find_product(pname):
+    if not pname:
+        return None
+    return mongo.db.products.find_one({
+        '$or': [
+            {'name':     {'$regex': pname, '$options': 'i'}},
+            {'category': {'$regex': pname, '$options': 'i'}},
+            {'tags':     {'$in':    [pname.lower()]}}
+        ]
+    })
+
+def clean_text(text, remove_words):
+    pattern = r'\b(' + '|'.join(remove_words) + r')\b'
+    return re.sub(pattern, '', text).strip()
+
+@voice_bp.route('/command', methods=['POST'])
+@jwt_required()
+def command():
+    uid        = get_jwt_identity()
+    transcript = request.json.get('transcript', '').strip()
+    t          = transcript.lower()
+    print(f"[VOICE] Received: {transcript}")
+
+    # ────────────────────────────────────────────────────
+    # 1. AMAZON REDIRECT (checked FIRST!)
+    # ────────────────────────────────────────────────────
+    if 'amazon' in t:
+        print("[VOICE] Intent: amazon_redirect")
+        clean = clean_text(t, ['search','find','show','buy','get','on',
+                                'amazon','for','me','the','a','an','i','want'])
+        url     = f"https://www.amazon.in/s?k={clean.replace(' ', '+')}"
+        msg     = f"Opening Amazon for '{clean}'!"
+        print(f"[VOICE] Amazon URL: {url}")
+        return jsonify({
+            'intent':   'redirect',
+            'redirect': url,
+            'message':  msg
+        })
+
+    # ────────────────────────────────────────────────────
+    # 2. FLIPKART REDIRECT (checked SECOND!)
+    # ────────────────────────────────────────────────────
+    if 'flipkart' in t:
+        print("[VOICE] Intent: flipkart_redirect")
+        clean = clean_text(t, ['search','find','show','buy','get','on',
+                                'flipkart','for','me','the','a','an','i','want'])
+        url     = f"https://www.flipkart.com/search?q={clean.replace(' ', '+')}"
+        msg     = f"Opening Flipkart for '{clean}'!"
+        print(f"[VOICE] Flipkart URL: {url}")
+        return jsonify({
+            'intent':   'redirect',
+            'redirect': url,
+            'message':  msg
+        })
+
+    # ────────────────────────────────────────────────────
+    # 3. ADD TO CART
+    # ────────────────────────────────────────────────────
+    if any(w in t for w in ['add','put','buy','want','get','order']):
+        print("[VOICE] Intent: add_to_cart")
+        clean = clean_text(t, ['add','put','buy','want','get','order',
+                                'to','my','cart','please','in','the',
+                                'a','an','i','me','into','this'])
+        print(f"[VOICE] Product keyword: '{clean}'")
+        qty = extract_quantity(t)
+        p   = find_product(clean)
+        if p:
+            pid  = str(p['_id'])
+            user = mongo.db.users.find_one({'_id': ObjectId(uid)})
+            cart = user.get('cart', [])
+            for item in cart:
+                if item['product_id'] == pid:
+                    item['quantity'] += qty
+                    break
+            else:
+                cart.append({'product_id': pid, 'quantity': qty})
+            mongo.db.users.update_one(
+                {'_id': ObjectId(uid)},
+                {'$set': {'cart': cart}}
+            )
+            print(f"[VOICE] ✅ Added {p['name']} x{qty} to cart")
+            return jsonify({
+                'intent':     'add_to_cart',
+                'message':    f"✅ Added {qty} × {p['name']} to your cart!",
+                'cart_count': len(cart)
+            })
+        else:
+            return jsonify({
+                'intent':  'add_to_cart',
+                'message': f"❌ Sorry, could not find '{clean}' in our store."
+            })
+
+    # ────────────────────────────────────────────────────
+    # 4. REMOVE FROM CART
+    # ────────────────────────────────────────────────────
+    if any(w in t for w in ['remove','delete','take out']):
+        print("[VOICE] Intent: remove_from_cart")
+        clean    = clean_text(t, ['remove','delete','take','out','from',
+                                   'cart','my','the','please','i','want','to'])
+        user     = mongo.db.users.find_one({'_id': ObjectId(uid)})
+        cart     = user.get('cart', [])
+        new_cart = []
+        removed  = False
+        for item in cart:
+            p = mongo.db.products.find_one({'_id': ObjectId(item['product_id'])})
+            if p and clean in p['name'].lower():
+                removed = True
+            else:
+                new_cart.append(item)
+        mongo.db.users.update_one(
+            {'_id': ObjectId(uid)},
+            {'$set': {'cart': new_cart}}
+        )
+        msg = "✅ Removed from cart!" if removed else f"❌ '{clean}' not found in cart."
+        return jsonify({
+            'intent':     'remove_from_cart',
+            'message':    msg,
+            'cart_count': len(new_cart)
+        })
+
+    # ────────────────────────────────────────────────────
+    # 5. CHECKOUT
+    # ────────────────────────────────────────────────────
+    if any(w in t for w in ['checkout','place order','proceed','payment','order now']):
+        print("[VOICE] Intent: checkout")
+        return jsonify({
+            'intent':           'checkout',
+            'trigger_checkout': True,
+            'message':          '🚀 Opening checkout for you!'
+        })
+
+    # ────────────────────────────────────────────────────
+    # 6. VIEW CART
+    # ────────────────────────────────────────────────────
+    if any(w in t for w in ['show cart','view cart','what is in','how many','open cart','my cart']):
+        print("[VOICE] Intent: view_cart")
+        user  = mongo.db.users.find_one({'_id': ObjectId(uid)})
+        cart  = user.get('cart', [])
+        total = 0
+        for i in cart:
+            p = mongo.db.products.find_one({'_id': ObjectId(i['product_id'])})
+            if p:
+                total += p['price'] * i['quantity']
+        msg = (
+            f"🛒 You have {len(cart)} items totalling ₹{round(total,2)}"
+            if cart else "🛒 Your cart is empty!"
+        )
+        return jsonify({
+            'intent':     'view_cart',
+            'message':    msg,
+            'cart_total': round(total, 2)
+        })
+
+    # ────────────────────────────────────────────────────
+    # 7. SEARCH PRODUCTS (default)
+    # ────────────────────────────────────────────────────
+    print("[VOICE] Intent: search_products")
+    clean = clean_text(t, ['show','find','search','look','display','for',
+                            'me','all','some','please','products','items',
+                            'give','list'])
     print(f"[VOICE] Search keyword: '{clean}'")
 
     if clean:

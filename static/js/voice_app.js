@@ -62,7 +62,7 @@ async function sendVoiceCommand(transcript) {
   }
 }
 
-function handleVoiceResponse(data) {
+/*function handleVoiceResponse(data) {
   showAIMessage(data.message || 'Done!');
   speak(data.message || '');
 
@@ -77,8 +77,30 @@ function handleVoiceResponse(data) {
     closeCart();
     showModal('checkoutModal');
   }
-}
+*/
 
+function handleVoiceResponse(data) {
+  showAIMessage(data.message || 'Done!');
+  speak(data.message || '');
+
+  if (data.intent === 'redirect' && data.redirect) {
+    // Open Amazon or Flipkart in new tab
+    setTimeout(() => window.open(data.redirect, '_blank'), 1000);
+
+  } else if (data.intent === 'search_products' && data.products) {
+    renderProducts(data.products);
+    document.getElementById('sectionTitle').textContent = `🔍 Voice Search Results`;
+
+  } else if (data.intent === 'add_to_cart') {
+    updateCartBadge(data.cart_count);
+
+  } else if (data.intent === 'view_cart') {
+    showCart();
+
+  } else if (data.intent === 'checkout' && data.trigger_checkout) {
+    showCheckout();
+  }
+}
 function speak(text) {
   if (!text) return;
   const utter = new SpeechSynthesisUtterance(text);
@@ -111,8 +133,8 @@ function renderProducts(products) {
       </div>
     </div>`).join('');
 }
-/*
-function renderProducts(list) {
+
+/*function renderProducts(list) {
   const grid = document.getElementById('productsGrid');
   if (!list.length) {
     grid.innerHTML = '<p style="color:#999;grid-column:1/-1;text-align:center;padding:40px">No products found 😕</p>';
@@ -140,8 +162,41 @@ function renderProducts(list) {
         </div>
       </div>
     </div>`).join('');
+}*/
+
+function renderProducts(list) {
+  const grid = document.getElementById('productsGrid');
+  if (!list.length) {
+    grid.innerHTML = '<p style="color:#999;grid-column:1/-1;text-align:center;padding:40px">No products found 😕</p>';
+    return;
+  }
+  grid.innerHTML = list.map(p => `
+    <div class="product-card">
+      <img
+        src="${p.image || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=400&fit=crop'}"
+        alt="${p.name}"
+        style="width:100%;height:200px;object-fit:cover;border-radius:10px 10px 0 0;"
+        onerror="this.src='https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=400&fit=crop'"
+      >
+      <div class="product-info">
+        <div class="product-name">${p.name}</div>
+        <div class="product-category">${p.category}</div>
+        <div class="product-price">₹${p.price.toLocaleString('en-IN')}</div>
+        <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;">
+          <button class="btn-add-cart" onclick="addToCart('${p._id}','${p.name}')">
+            Add to Cart 🛒
+          </button>
+          <a href="https://www.amazon.in/s?k=${encodeURIComponent(p.name)}"
+             target="_blank" class="btn-amazon">Buy on Amazon
+          </a>
+          <a href="https://www.flipkart.com/search?q=${encodeURIComponent(p.name)}"
+             target="_blank" class="btn-flipkart">Buy on Flipkart
+          </a>
+        </div>
+      </div>
+    </div>`).join('');
 }
-    */
+    
 
 async function loadCategories() {
   const res = await fetch(`${API}/api/products/categories`);
