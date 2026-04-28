@@ -62,29 +62,11 @@ async function sendVoiceCommand(transcript) {
   }
 }
 
-/*function handleVoiceResponse(data) {
-  showAIMessage(data.message || 'Done!');
-  speak(data.message || '');
-
-  if (data.intent === 'search_products' && data.products) {
-    renderProducts(data.products);
-    document.getElementById('sectionTitle').textContent = `Voice Search: "${document.getElementById('voiceTranscript').textContent}"`;
-  } else if (data.intent === 'add_to_cart') {
-    updateCartCount(data.cart_count);
-  } else if (data.intent === 'view_cart') {
-    showCart();
-  } else if (data.trigger_checkout) {
-    closeCart();
-    showModal('checkoutModal');
-  }
-*/
-
 function handleVoiceResponse(data) {
   showAIMessage(data.message || 'Done!');
   speak(data.message || '');
 
   if (data.intent === 'redirect' && data.redirect) {
-    // Open Amazon or Flipkart in new tab
     setTimeout(() => window.open(data.redirect, '_blank'), 1000);
 
   } else if (data.intent === 'search_products' && data.products) {
@@ -92,15 +74,19 @@ function handleVoiceResponse(data) {
     document.getElementById('sectionTitle').textContent = `🔍 Voice Search Results`;
 
   } else if (data.intent === 'add_to_cart') {
-    updateCartBadge(data.cart_count);
+    updateCartCount(data.cart_count);
 
   } else if (data.intent === 'view_cart') {
     showCart();
 
   } else if (data.intent === 'checkout' && data.trigger_checkout) {
     showCheckout();
+
+  } else if (data.intent === 'view_orders' && data.trigger_orders) {
+    showOrders();
   }
 }
+
 function speak(text) {
   if (!text) return;
   const utter = new SpeechSynthesisUtterance(text);
@@ -118,51 +104,6 @@ async function loadProducts(query = '', category = '') {
   const products = await res.json();
   renderProducts(products);
 }
-
-function renderProducts(products) {
-  const grid = document.getElementById('productsGrid');
-  if (!products.length) { grid.innerHTML = '<p style="color:#999;grid-column:1/-1">No products found.</p>'; return; }
-  grid.innerHTML = products.map(p => `
-    <div class="product-card">
-      <img src="${p.image || 'https://via.placeholder.com/300x300?text=Product'}" alt="${p.name}" loading="lazy">
-      <div class="product-info">
-        <div class="product-name">${p.name}</div>
-        <div class="product-category">${p.category}</div>
-        <div class="product-price">₹${p.price.toLocaleString()}</div>
-        <button class="btn-add-cart" onclick="addToCart('${p._id}', '${p.name}')">Add to Cart 🛒</button>
-      </div>
-    </div>`).join('');
-}
-
-/*function renderProducts(list) {
-  const grid = document.getElementById('productsGrid');
-  if (!list.length) {
-    grid.innerHTML = '<p style="color:#999;grid-column:1/-1;text-align:center;padding:40px">No products found 😕</p>';
-    return;
-  }
-  grid.innerHTML = list.map(p => `
-    <div class="product-card">
-      <div class="product-img">${p.emoji || '📦'}</div>
-      <div class="product-info">
-        <div class="product-name">${p.name}</div>
-        <div class="product-category">${p.category}</div>
-        <div class="product-price">₹${p.price.toLocaleString('en-IN')}</div>
-        <div style="display:flex;gap:8px;margin-top:8px;">
-          <button class="btn-add-cart" onclick="addToCart('${p._id}','${p.name}')">
-            Add to Cart 🛒
-          </button>
-          <a href="https://www.amazon.in/s?k=${encodeURIComponent(p.name)}&tag=YOUR_AFFILIATE_TAG"
-             target="_blank" class="btn-amazon">
-            Buy on Amazon
-          </a>
-          <a href="https://www.flipkart.com/search?q=${encodeURIComponent(p.name)}"
-             target="_blank" class="btn-flipkart">
-            Buy on Flipkart
-          </a>
-        </div>
-      </div>
-    </div>`).join('');
-}*/
 
 function renderProducts(list) {
   const grid = document.getElementById('productsGrid');
@@ -196,7 +137,6 @@ function renderProducts(list) {
       </div>
     </div>`).join('');
 }
-    
 
 async function loadCategories() {
   const res = await fetch(`${API}/api/products/categories`);
@@ -333,7 +273,6 @@ function showAIMessage(msg) {
   setTimeout(() => document.getElementById('aiBubble').style.display = 'none', 5000);
 }
 
-
 // ─── ORDER HISTORY ────────────────────────────────────
 async function showOrders() {
   if (!token) { showModal('loginModal'); return; }
@@ -388,7 +327,6 @@ async function showOrders() {
 
   showModal('ordersModal');
 }
-
 
 function showModal(id) { document.getElementById(id).classList.add('open'); }
 function closeModal(id) { document.getElementById(id).classList.remove('open'); }

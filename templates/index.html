@@ -18,8 +18,9 @@
       <button onclick="showModal('loginModal')" class="btn-outline">Login</button>
       <button onclick="showModal('registerModal')" class="btn-primary">Register</button>
     </div>
-    <div id="userMenu" style="display:none">
+    <div id="userMenu" style="display:none;align-items:center;gap:10px;">
       <span id="userName"></span>
+      <button onclick="showOrders()" class="btn-orders"> My Orders</button>
       <button onclick="showCart()" class="btn-cart">🛒 <span id="cartCount">0</span></button>
       <button onclick="logout()" class="btn-outline">Logout</button>
     </div>
@@ -112,14 +113,6 @@
     <button class="btn-primary full-width" onclick="closeModal('successModal')">Continue Shopping</button>
   </div>
 </div>
-
-<div id="userMenu" style="display:none;align-items:center;gap:10px;">
-  <span id="userName"></span>
-  <button onclick="showOrders()" class="btn-orders"> My Orders</button>
-  <button onclick="showCart()" class="btn-cart">🛒 <span id="cartCount">0</span></button>
-  <button onclick="logout()" class="btn-outline">Logout</button>
-</div>
-
 
 <div class="modal" id="ordersModal">
   <div class="modal-box" style="width:600px;max-width:95vw;">

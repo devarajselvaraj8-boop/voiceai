@@ -343,7 +343,24 @@ def command():
         })
 
     # ────────────────────────────────────────────────────
-    # 7. SEARCH PRODUCTS (default)
+    # 7. VIEW ORDERS
+    # ────────────────────────────────────────────────────
+    if any(w in t for w in ['my orders','show orders','view orders','order history','open orders']):
+        print("[VOICE] Intent: view_orders")
+        orders = list(mongo.db.orders.find({'user_id': uid}))
+        msg = (
+            f"📋 You have {len(orders)} order(s). Opening your order history!"
+            if orders else
+            "📋 You have no orders yet!"
+        )
+        return jsonify({
+            'intent':       'view_orders',
+            'message':      msg,
+            'trigger_orders': True
+        })
+
+    # ────────────────────────────────────────────────────
+    # 8. SEARCH PRODUCTS (default)
     # ────────────────────────────────────────────────────
     print("[VOICE] Intent: search_products")
     clean = clean_text(t, ['show','find','search','look','display','for',
